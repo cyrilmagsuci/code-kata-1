@@ -1,4 +1,4 @@
-# Coding Exam for VISA
+# Coding Exam
 
 http://codekata.com/kata/kata09-back-to-the-checkout/
 
