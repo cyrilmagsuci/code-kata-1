@@ -17,11 +17,11 @@ public class Checkout : Entity
     public Guid UserSessionId { get; private set; }
     public List<CheckoutItem> CheckoutItems { get; private set; } = new();
     public List<PromoCode> PromoCodes { get; private set; } = new();
-  
-    [NotMapped]
-    private IReadOnlyList<PricingRule> _pricingRules;
 
-    public static Checkout Create(Guid userSessionId, IReadOnlyList<PromoCode> promoCodes, IReadOnlyList<PricingRule>? pricingRules = null)
+    [NotMapped] private IReadOnlyList<PricingRule> _pricingRules;
+
+    public static Checkout Create(Guid userSessionId, IReadOnlyList<PromoCode> promoCodes,
+        IReadOnlyList<PricingRule>? pricingRules = null)
     {
         return new Checkout(Guid.NewGuid(), userSessionId)
         {
@@ -34,14 +34,12 @@ public class Checkout : Entity
     {
         _pricingRules = pricingRules;
     }
-    
+
     public void Scan(CheckoutItem item)
     {
         _checkoutItems.Add(item);
 
-        decimal runningQuantity = _checkoutItems
-            .Where(x => x.Sku == item.Sku && x.UnitOfMeasure == item.UnitOfMeasure)
-            .Sum(x => x.Quantity.Value);
+        decimal runningQuantity = GetRunningQuantity(item).Value;
 
         decimal total = 0;
 
@@ -56,7 +54,16 @@ public class Checkout : Entity
         _calculatedItemPrices[new CheckoutItemPriceKey(item.Sku, item.UnitOfMeasure)] = total;
     }
 
-    private PricingRule GetPricingRule(Sku sku, Quantity quantity, UnitOfMeasure unitOfMeasure)
+    public Quantity GetRunningQuantity(CheckoutItem item)
+    {
+        decimal runningQuantity = _checkoutItems
+            .Where(x => x.Sku == item.Sku && x.UnitOfMeasure == item.UnitOfMeasure)
+            .Sum(x => x.Quantity.Value);
+
+        return Quantity.From(runningQuantity);
+    }
+
+    public PricingRule GetPricingRule(Sku sku, Quantity quantity, UnitOfMeasure unitOfMeasure)
     {
         PricingRule applicablePricingRule = _pricingRules
             .Where(x => x.Sku == sku &&

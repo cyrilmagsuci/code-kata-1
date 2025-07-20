@@ -9,4 +9,4 @@ public sealed record CheckoutItemCommand(
     Quantity Quantity,
     UnitOfMeasure UnitOfMeasure,
     IReadOnlyList<PromoCode> PromoCodes)
-    : ICommand<Amount>;
+    : ICommand<CheckoutItemResponse>;

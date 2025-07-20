@@ -18,12 +18,12 @@ public class CheckoutItem : IEndpoint
             {
                 var command = new CheckoutItemCommand(
                     request.UserSessionId,
-                    request.Sku,
-                    request.Quantity,
-                    request.UnitOfMeasure,
-                    request.PromoCodes);
+                    Sku.From(request.Sku),
+                    Quantity.From(request.Quantity),
+                    UnitOfMeasure.From(request.UnitOfMeasure),
+                    (request.PromoCodes ?? ["default"]).Select(x => PromoCode.From(x)).ToArray());
 
-                Result<Amount> result = await sender.Send(command, cancellationToken);
+                Result<CheckoutItemResponse> result = await sender.Send(command, cancellationToken);
 
                 return result.Match(Results.Ok, CustomResults.Problem);
             })

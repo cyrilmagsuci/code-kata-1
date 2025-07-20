@@ -10,11 +10,11 @@ namespace Application.Checkout;
 
 internal sealed class CheckoutItemCommandHandler(
     IApplicationDbContext applicationDbContext,
-    IUnitOfWork unitOfWork) : ICommandHandler<CheckoutItemCommand, Amount>
+    IUnitOfWork unitOfWork) : ICommandHandler<CheckoutItemCommand, CheckoutItemResponse>
 {
-    public async Task<Result<Amount>> Handle(CheckoutItemCommand command, CancellationToken cancellationToken)
+    public async Task<Result<CheckoutItemResponse>> Handle(CheckoutItemCommand command,
+        CancellationToken cancellationToken)
     {
-    
         PromoCode[] promoCodes = command.PromoCodes.ToArray();
         string[] promoCodesFilter = promoCodes.Select(x => x.Value).ToArray();
         IReadOnlyList<Domain.Checkout.PricingRule> pricingRules =
@@ -57,10 +57,14 @@ internal sealed class CheckoutItemCommandHandler(
         {
             applicationDbContext.UpdateEntity(checkout);
         }
+
         applicationDbContext.AddEntity(checkoutItem);
-        
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Amount.From(checkout.Total);
+        var runningQuantity = checkout.GetRunningQuantity(checkoutItem);
+        var pricingRule = checkout.GetPricingRule(checkoutItem.Sku, runningQuantity, checkoutItem.UnitOfMeasure);
+        return new CheckoutItemResponse(pricingRule.PricePerUnit.Value, checkout.Total, pricingRule.IsBundle,
+            pricingRule.Quantity.Value);
     }
 }

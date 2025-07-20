@@ -98,11 +98,11 @@ public class CheckoutItemCommandTests
                 Quantity.Create(1).Value,
                 unitOfMeasure, [promoCode]);
 
-            Result<Amount> result = await _handler.Handle(command, default);
+            Result<CheckoutItemResponse> result = await _handler.Handle(command, default);
 
             result.IsSuccess.Should().BeTrue();
 
-            total = result.Value.Value;
+            total = result.Value.TotalAmount;
         }
 
         // Assert

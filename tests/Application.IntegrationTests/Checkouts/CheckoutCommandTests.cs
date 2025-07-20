@@ -22,11 +22,11 @@ public class CheckoutCommandTests : BaseIntegrationTest
             UnitOfMeasure.From("piece"), [PromoCode.From("default")]);
 
         // Act
-        Result<Amount> result = await Sender.Send(command);
+        Result<CheckoutItemResponse> result = await Sender.Send(command);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().Be(Amount.From(50));
+        result.Value.TotalAmount.Should().Be(50);
     }
  
 }

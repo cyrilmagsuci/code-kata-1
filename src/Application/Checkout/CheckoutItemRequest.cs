@@ -4,7 +4,7 @@ namespace Application.Checkout;
 
 public sealed record CheckoutItemRequest(
     Guid UserSessionId,
-    Sku Sku,
-    Quantity Quantity,
-    UnitOfMeasure UnitOfMeasure,
-    IReadOnlyList<PromoCode> PromoCodes);
+    string Sku,
+    decimal Quantity,
+    string UnitOfMeasure,
+    IReadOnlyList<string> PromoCodes);
